@@ -89,8 +89,13 @@ for task in tasks:
             line.append("")
     lines.append(line)
 
+# strip email domains out of team member names to leave their ID names
+stripped_members = []
+for member in team_members:
+    stripped_members.append(member.replace("@asu.edu",""))
+
 with open('draft_work_report.csv', 'w', newline='') as csvfile:
-    fieldnames = ['Sprint (needs to be renamed)', 'User Story', 'Points', 'Task Link', 'Coding Task'] + team_members
+    fieldnames = ['Sprint (needs to be renamed)', 'User Story', 'Points', 'Task Link', 'Coding Task'] + stripped_members
     writer = csv.writer(csvfile)
     writer.writerow(fieldnames)
     writer.writerows(lines)
