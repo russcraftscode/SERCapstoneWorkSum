@@ -2,9 +2,8 @@ import json
 import sys
 import os
 import csv
-from pprint import pprint
 
-
+# Identify the file that contains the project tata
 json_filename = None
 
 if len(sys.argv) > 1: # set the json filename to the user supplied one
@@ -26,7 +25,7 @@ with open(json_filename , "r") as proj_file:
 
 task_url_start = "https://tree.taiga.io/project/" + proj_json["slug"] + "/task/"
 
-# get the user story numbers and their total point values
+# Get the user story numbers and their total point values
 user_stories_json = proj_json["user_stories"]
 user_stories = {}
 
@@ -56,7 +55,8 @@ for line in tasks_json:
         "story_number": line["user_story"],
         "task_number" : line["ref"],
         "link"        : task_url_start +  str(line["ref"]),
-        "assigned": line["assigned_to"],
+        "assigned"    : line["assigned_to"],
+        "sprint"      : line["milestone"]
     }
     # because sometimes there are storyless tasks that are pointless
     if line["user_story"] in user_stories:
@@ -75,15 +75,13 @@ for task in tasks: # make a list of all unique team members
 print(f"Identified {len(team_members)} team members")
 print(team_members)
 
-# Sprint	User Story	Story Points	Link to Task	Coding Task?	tapsey	casteri1	alewi104	rjohn172	bmarti65
-
 # generate lines for the csv output
 lines = []
 for task in tasks:
     if task["story_number"]:
-        line = ["sprint number", "US"+str(task["story_number"]), task["link"], task["points"], " "]
+        line = [ task["sprint"], "US"+str(task["story_number"]), task["points"], task["link"], " "]
     else:
-        line = ["sprint number", "Storyless Task", task["link"], task["points"], " "]
+        line = [ task["sprint"], "Storyless Task", task["points"], task["link"] , " "]
     for team_member in team_members: # put 100% in the proper column
         if team_member == task["assigned"]:
             line.append("100%")
@@ -92,8 +90,9 @@ for task in tasks:
     lines.append(line)
 
 with open('draft_work_report.csv', 'w', newline='') as csvfile:
-    fieldnames = ['Sprint', 'User Story', 'Points', 'Task Link', 'Coding Task'] + team_members
-    #writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    fieldnames = ['Sprint (needs to be renamed)', 'User Story', 'Points', 'Task Link', 'Coding Task'] + team_members
     writer = csv.writer(csvfile)
     writer.writerow(fieldnames)
     writer.writerows(lines)
+
+print("Output to 'draft_work_report.csv' .")
